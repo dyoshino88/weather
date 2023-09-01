@@ -5,6 +5,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "https://weather-app-front-eosin.vercel.app/",
 ]
 
 app.add_middleware(
