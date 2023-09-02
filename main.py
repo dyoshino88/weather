@@ -40,7 +40,7 @@ if db_url is None:
 result = urlparse(db_url)
 db_username = result.username
 db_password = result.password
-db_host = result.hosutname
+db_host = result.hostname
 db_port = result.port
 db_name = result.path[1:] # スラッシュを除外
 
