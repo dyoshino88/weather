@@ -105,7 +105,3 @@ if __name__ == "__main__":
         add_exception_handlers=True,
     )
     
-    
-# @app.get("/")
-# def Hello():
-#     return {"Hello":"World!"}
