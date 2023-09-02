@@ -6,6 +6,7 @@ from tortoise.models import Model
 import requests # OpenWeather APIへのリクエストをするために追加
 import os # 環境変数を読み取るために追加
 from fastapi.middleware.cors import CORSMiddleware
+from urllib.parse import urlparse
 
 # FastAPIアプリケーションのインスタンスを作成
 app = FastAPI()
@@ -29,6 +30,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# JAWSDB_URL環境変数から接続情報を取得
+db_url = os.getenv("JAWSDB_URL")
+
+if db_url is None:
+    raise Exception("JAWSDB_URLが設定されていません。")
+
+# URLをパースして必要な情報を取得
+result = urlparse(db_url)
+db_username = result.username
+db_password = result.password
+db_host = result.hosutname
+db_port = result.port
+db_name = result.path[1:] # スラッシュを除外
+
 # Tortoise-ORMを初期化
 Tortoise.init_models(["models"], "models")
 
@@ -37,7 +52,7 @@ class CityWeather(Model):
     id = fields.IntField(pk=True)
     city_name = fields.CharField(max_length=255)
     current_weather = fields.JSONField()
-    weekly_weather = fields.JSONFideld()
+    weekly_weather = fields.JSONField()
 
 # ルートモデルを作成
 class City(BaseModel):
@@ -84,11 +99,12 @@ if __name__ == "__main__":
     
     register_turtoise(
         app,
-        db_url="mysql://your_username:your_password@localhost/your_database",
+        db_url=f"mysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}",
         modules={"models": ["__main__"]},
         generate_schemas=True,
         add_exception_handlers=True,
     )
+    
     
 # @app.get("/")
 # def Hello():
