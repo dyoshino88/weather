@@ -1,8 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from tortoise import Tortoise
+from models import CityWeather, City
 from typing import List
-from tortoise import Tortoise, fields
-from tortoise.models import Model
 import requests # OpenWeather APIへのリクエストをするために追加
 import os # 環境変数を読み取るために追加
 from fastapi.middleware.cors import CORSMiddleware
@@ -46,17 +45,6 @@ db_name = result.path[1:] # スラッシュを除外
 
 # Tortoise-ORMを初期化
 Tortoise.init_models(["models"], "models")
-
-# モデルを定義
-class CityWeather(Model):
-    id = fields.IntField(pk=True)
-    city_name = fields.CharField(max_length=255)
-    current_weather = fields.JSONField()
-    weekly_weather = fields.JSONField()
-
-# ルートモデルを作成
-class City(BaseModel):
-    city_name: str
 
 # OpenWeather APIから天気情報を取得してデータベースに保存
 def get_weather_data(city_name):
