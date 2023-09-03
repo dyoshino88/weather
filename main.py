@@ -41,7 +41,7 @@ db_username = result.username
 db_password = result.password
 db_host = result.hostname
 db_port = result.port
-db_name = result.path[1:] # スラッシュを除外
+db_name = result.path.lstrip("/") # スラッシュを除外
 
 # Tortoise-ORMを初期化
 Tortoise.init_models(["models"], "models")
