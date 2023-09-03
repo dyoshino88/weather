@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from tortoise import Tortoise
+from tortoise.contrib.pydantic import pydantic_model_creator
 from models import CityWeather, City
 from typing import List
 import requests # OpenWeather APIへのリクエストをするために追加
@@ -43,6 +44,10 @@ db_host = result.hostname
 db_port = result.port
 db_name = result.path.lstrip("/") # スラッシュを除外
 
+# PydanticモデルをTortoise ORMモデルから自動生成
+City_Pydantic = pydantic_model_creator(City)
+CityWeather_Pydantic = pydantic_model_creator(CityWeather)
+
 # Tortoise-ORMを初期化
 Tortoise.init_models(["models"], "models")
 
@@ -56,8 +61,8 @@ def get_weather_data(city_name):
         return None
 
 # 都市を作成するエンドポイント
-@app.post("/cities/", response_model=CityWeather)
-async def create_city(city: City):
+@app.post("/cities/", response_model=CityWeather_Pydantic)
+async def create_city(city: City_Pydantic):
     # OpenWeather APIから天気情報を取得
     weather_data = get_weather_data(city.city_name)
     
@@ -73,7 +78,7 @@ async def create_city(city: City):
     return city_obj
 
 # 都市の天気情報を取得するエンドポイント
-@app.get("/cities/{city_name}", response_model=CityWeather)
+@app.get("/cities/{city_name}", response_model=CityWeather_Pydantic)
 async def get_city_weather(city_name: str):
     # データベースから都市の天気情報を取得
     city_obj = await CityWeather.get_or_none(city_name=city_name)
