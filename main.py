@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from tortoise import Tortoise
-from .models import CityWeather, City
+from models import CityWeather, City
 from typing import List
 import requests # OpenWeather APIへのリクエストをするために追加
 import os # 環境変数を読み取るために追加
