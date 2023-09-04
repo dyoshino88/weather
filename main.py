@@ -1,22 +1,21 @@
 from fastapi import FastAPI, HTTPException
-from tortoise import Tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator
 from models import CityWeather, City
 from typing import List
-import requests # OpenWeather APIへのリクエストをするために追加
-import os # 環境変数を読み取るために追加
+import requests
+import os
 from fastapi.middleware.cors import CORSMiddleware
 from urllib.parse import urlparse
 
-# FastAPIアプリケーションのインスタンスを作成
 app = FastAPI()
 
-# 環境変数からOpenWeather APIキーを取得
+# OpenWeather APIキーを環境変数から取得
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 if OPENWEATHER_API_KEY is None:
     raise Exception("OpenWeather APIキーが設定されていません。")
 
+# CORS設定：クロスオリジンリクエストを許可する
 origins = [
     "http://localhost:3000",
     "https://weather-app-front-eosin.vercel.app",
@@ -30,28 +29,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# JAWSDB_URL環境変数から接続情報を取得
+# JAWSDB_URLからデータベース接続情報を取得
 db_url = os.getenv("JAWSDB_URL")
 
 if db_url is None:
     raise Exception("JAWSDB_URLが設定されていません。")
 
-# URLをパースして必要な情報を取得
+# JAWSDB_URLをパースして必要な情報を取得
 result = urlparse(db_url)
 db_username = result.username
 db_password = result.password
 db_host = result.hostname
 db_port = result.port
-db_name = result.path.lstrip("/") # スラッシュを除外
+db_name = result.path.lstrip("/")
 
 # PydanticモデルをTortoise ORMモデルから自動生成
 City_Pydantic = pydantic_model_creator(City)
 CityWeather_Pydantic = pydantic_model_creator(CityWeather)
 
-# Tortoise-ORMを初期化
-Tortoise.init_models(["models"], "models")
-
-# OpenWeather APIから天気情報を取得してデータベースに保存
+# OpenWeather APIから天気情報を取得する関数
 def get_weather_data(city_name):
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={OPENWEATHER_API_KEY}&units=metric"
     response = requests.get(url)
@@ -88,13 +84,13 @@ async def get_city_weather(city_name: str):
 
 # FastAPIアプリケーションを起動
 if __name__ == "__main__":
-    from tortoise.contrib.fastapi import register_turtoise
+    from tortoise.contrib.fastapi import register_tortoise
     
-    register_turtoise(
+    # Tortoise ORMを初期化し、データベース接続を設定
+    register_tortoise(
         app,
         db_url=f"mysql://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}",
         modules={"models": ["__main__"]},
         generate_schemas=True,
         add_exception_handlers=True,
     )
-    
