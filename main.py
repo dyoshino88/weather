@@ -8,7 +8,7 @@ app = FastAPI()
 # バックエンドのCORS設定
 origins = [
     "http://localhost:3000",  # フロントエンドのアドレス
-    "https://weather-app-front-eosin.vercel.app/",  # プロダクション環境のフロントエンドアドレス
+    "https://weather-app-front-eosin.vercel.app",  # プロダクション環境のフロントエンドアドレス
 ]
 
 app.add_middleware(
