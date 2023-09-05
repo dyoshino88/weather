@@ -1,8 +1,23 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
 
 app = FastAPI()
+
+# バックエンドのCORS設定
+origins = [
+    "http://localhost:3000",  # フロントエンドのアドレス
+    "https://weather-app-front-3csld4oar-dyoshino88.vercel.app",  # プロダクション環境のフロントエンドアドレス
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # 必要なHTTPメソッドを指定します
+    allow_headers=["*"],  # 必要なHTTPヘッダーを指定します
+)
 
 # OpenWeather APIのエンドポイントとAPIキー
 OPENWEATHER_API_URL = "http://api.openweathermap.org/data/2.5/weather"
