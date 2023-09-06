@@ -11,3 +11,6 @@ class CityWeather(Model):
     weather = fields.CharField(max_length=255)
     temperature = fields.DecimalField(max_digits=5, decimal_places=2)
     created_at = fields.DatetimeField(auto_now_add=True)
+    
+    class Meta:
+        table = "city_weather_data"  # テーブル名を指定
