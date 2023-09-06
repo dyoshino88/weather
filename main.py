@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 # Herokuの環境変数からデータベース接続情報を取得
-db_url = os.getenv("DATABASE_URL")
+db_url = os.getenv("JAWSDB_URL")
 
 # OpenWeather APIのエンドポイントとAPIキー
 OPENWEATHER_API_URL = "http://api.openweathermap.org/data/2.5/weather"
