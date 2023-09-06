@@ -44,8 +44,12 @@ class CityWeather(Model):
     
 # データベース接続の初期化を非同期関数で行う
 async def initialize_db():
-    await Tortoise.init(db_url=db_url)  # Herokuの環境変数からデータベース接続情報を読み込む
-    await Tortoise.init_models(["__main__"], "main")
+    await Tortoise.init(
+        db_url=db_url,
+        modules={"models": ["__main__"]},  # モデルが存在するモジュールを指定
+        default_connection="default",  # デフォルトのデータベース接続を指定
+    )
+    await Tortoise.generate_schemas()  # スキーマの生成
 
 City_Pydantic = pydantic_model_creator(City)
 CityWeather_Pydantic = pydantic_model_creator(CityWeather)
@@ -87,6 +91,5 @@ async def get_and_store_weather(city_name: str):
 
 if __name__ == "__main__":
     run_async(initialize_db())
-    Tortoise.generate_schemas()
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))  # Herokuのポートを取得
