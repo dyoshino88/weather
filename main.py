@@ -4,8 +4,7 @@ import requests
 import os
 from tortoise.contrib.pydantic import pydantic_model_creator
 from tortoise.models import Model
-from tortoise import fields
-from tortoise import Tortoise, run_async
+from tortoise import fields, Tortoise, run_async
 from datetime import date
 
 app = FastAPI()
@@ -42,13 +41,12 @@ class CityWeather(Model):
     weather = fields.CharField(max_length=255)
     temperature = fields.DecimalField(max_digits=5, decimal_places=2)
     created_at = fields.DatetimeField(auto_now_add=True)
+    
+# データベース接続の初期化を非同期関数で行う
+async def initialize_db():
+    await Tortoise.init(db_url=db_url)  # Herokuの環境変数からデータベース接続情報を読み込む
+    await Tortoise.init_models(["__main__"], "main")
 
-# デフォルトのデータベース接続を設定
-Tortoise.default_connection = "default"  # データベース接続の名前を設定
-
-Tortoise.init(db_url=db_url)  # Herokuの環境変数からデータベース接続情報を読み込む
-
-Tortoise.init_models(["__main__"], "models")
 City_Pydantic = pydantic_model_creator(City)
 CityWeather_Pydantic = pydantic_model_creator(CityWeather)
 
@@ -88,6 +86,7 @@ async def get_and_store_weather(city_name: str):
         raise HTTPException(status_code=response.status_code, detail="City not found")
 
 if __name__ == "__main__":
+    run_async(initialize_db())
     Tortoise.generate_schemas()
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))  # Herokuのポートを取得
