@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 import os
 from tortoise.contrib.pydantic import pydantic_model_creator
-from tortoise.models import Model
 from tortoise import fields, Tortoise, run_async
 from datetime import date
+from models import City, CityWeather  # models.py からモデルをインポート
 
 app = FastAPI()
 
@@ -30,23 +30,11 @@ db_url = os.getenv("JAWSDB_URL")
 OPENWEATHER_API_URL = "http://api.openweathermap.org/data/2.5/weather"
 OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
-# Tortoise ORMモデル
-class City(Model):
-    id = fields.IntField(pk=True)
-    city_name = fields.CharField(max_length=255, unique=True)
-
-class CityWeather(Model):
-    id = fields.IntField(pk=True)
-    city_name = fields.CharField(max_length=255, unique=True)
-    weather = fields.CharField(max_length=255)
-    temperature = fields.DecimalField(max_digits=5, decimal_places=2)
-    created_at = fields.DatetimeField(auto_now_add=True)
-    
 # データベース接続の初期化を非同期関数で行う
 async def initialize_db():
     await Tortoise.init(
         db_url=db_url,
-        modules={"models": ["__main__"]},  # モデルが存在するモジュールを指定
+        modules={"models": ["models"]},  # モデルが存在するモジュールを指定
         default_connection="default",  # デフォルトのデータベース接続を指定
     )
     await Tortoise.generate_schemas()  # スキーマの生成
